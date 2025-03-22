@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Main Content -->
+<section class="hero">
+  <div class="container">
+    <h1>Borrow Item</h1>
+    <p>
+      You are borrowing: <strong>{{ item.title }}</strong> by {{ item.author }}
+    </p>
+  </div>
+
+  <section class="messages">
+    <div class="container">
+      <form method="post" class="form-container">
+        <label for="customer_id">Customer ID:</label>
+        <input
+          type="text"
+          id="customer_id"
+          name="customer_id"
+          required
+          placeholder="Enter your Customer ID"
+        /><br /><br />
+
+        <label for="borrowed_date">Borrow Date:</label>
+        <input
+          type="date"
+          id="borrowed_date"
+          name="borrowed_date"
+          required
+        /><br /><br />
+
+        <p>Due Date is set 14 days from the borrow date</p>
+        <!-- <label for="due_date">Due Date:</label>
+        <input type="date" id="due_date" name="due_date" required /><br /><br /> -->
+
+        <button type="submit" class="btn">Confirm Borrow</button>
+      </form>
+      <p>
+        <a href="{{ url_for('list_items') }}" class="btn">Back to Items</a>
+      </p>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

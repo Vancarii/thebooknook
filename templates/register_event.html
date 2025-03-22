@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Library Events</h1>
+    <p>Discover and register for exciting events happening at the library!</p>
+  </div>
+  <!-- Events Table -->
+  <section class="messages">
+    <div class="container">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Type</th>
+            <th>Date & Time</th>
+            <th>Location</th>
+            <th>Register</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+          <tr>
+            <td>{{ event.event_name }}</td>
+            <td>{{ event.event_type }}</td>
+            <td>{{ event.datetime }}</td>
+            <td>{{ event.location }}</td>
+            <td>
+              <form method="post" class="form-inline">
+                <input
+                  type="hidden"
+                  name="event_id"
+                  value="{{ event.event_id }}"
+                />
+                <input
+                  type="text"
+                  name="customer_id"
+                  placeholder="Customer ID"
+                  required
+                />
+                <button type="submit" class="btn">Register</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

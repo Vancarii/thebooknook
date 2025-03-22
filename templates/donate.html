@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Donate an Item</h1>
+    <p>Help others by donating books or other library items.</p>
+  </div>
+
+  <!-- Main Content -->
+  <section class="messages">
+    <div class="container">
+      <form method="post" class="form-container">
+        <label for="title">Title:</label>
+        <input
+          type="text"
+          id="title"
+          placeholder="Name of the item"
+          name="title"
+          required
+        />
+        <br /><br />
+
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" /><br /><br />
+
+        <label for="item_type">Type (Book, CD, etc.):</label>
+        <input
+          type="text"
+          id="item_type"
+          name="item_type"
+          required
+        /><br /><br />
+
+        <label for="format">Format (Print, Online, etc.):</label>
+        <input type="text" id="format" name="format" /><br /><br />
+
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="genre" /><br /><br />
+
+        <label for="published_date">Published Date:</label>
+        <input
+          type="date"
+          id="published_date"
+          name="published_date"
+        /><br /><br />
+
+        <label for="restriction">Age Restriction (optional):</label>
+        <input type="number" id="restriction" name="restriction" /><br /><br />
+
+        <button type="submit" class="btn">Donate Item</button>
+      </form>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

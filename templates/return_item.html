@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Return Item</h1>
+    {% if not transaction %}
+    <p>Enter the Transaction ID to return an item.</p>
+    <form method="post" class="form-container">
+      <label for="transaction_id">Transaction ID:</label>
+      <input
+        type="text"
+        id="transaction_id"
+        name="transaction_id"
+        placeholder="Enter Transaction ID"
+        class="search-input"
+        required
+      />
+      <button type="submit" class="btn">Search</button>
+    </form>
+    {% else %}
+    <p>Returning Transaction #{{ transaction.transaction_id }}</p>
+    <p>Item ID: {{ transaction.item_id }}</p>
+    <p>Borrowed Date: {{ transaction.borrowed_date }}</p>
+    <p>Due Date: {{ transaction.due_date }}</p>
+    <p>Returned Date (if any): {{ transaction.returned_date }}</p>
+    <form method="post" class="form-container">
+      <label>Returned Date:</label>
+      <input type="date" name="returned_date" required /><br /><br />
+
+      <label>Fine (if applicable):</label>
+      <input
+        type="number"
+        step="0.01"
+        name="amount_of_fine"
+        placeholder="0.00"
+      /><br /><br />
+
+      <button type="submit" class="btn">Confirm Return</button>
+    </form>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

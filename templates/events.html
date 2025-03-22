@@ -1,0 +1,68 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Library Events</h1>
+    <p>Discover and register for exciting events happening at the library.</p>
+  </div>
+
+  <!-- Search Form -->
+  <section class="messages">
+    <div class="container">
+      <form
+        method="get"
+        action="{{ url_for('list_events') }}"
+        class="form-container"
+      >
+        <input
+          type="text"
+          name="q"
+          placeholder="Search events..."
+          value="{{ search_query }}"
+          class="search-input"
+        />
+        <button type="submit" class="btn">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Events Table -->
+  <section class="items">
+    <div class="container">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Event Name</th>
+            <th>Event Type</th>
+            <th>Location</th>
+            <th>Date & Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+          <tr>
+            <td>{{ event.event_id }}</td>
+            <td>{{ event.event_name }}</td>
+            <td>{{ event.event_type }}</td>
+            <td>{{ event.location }}</td>
+            <td>{{ event.datetime }}</td>
+            <td>
+              <a
+                href="{{ url_for('register_event', event_id=event.event_id) }}"
+                class="btn"
+              >
+                Register
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

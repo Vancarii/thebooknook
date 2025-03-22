@@ -1,0 +1,28 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Ask a Librarian</h1>
+    <p>Have a question? Our librarians are here to help you!</p>
+  </div>
+  <!-- Ask Librarian Form -->
+  <section class="messages">
+    <div class="container">
+      <form method="post" class="form-container">
+        <label for="question">Your Question:</label>
+        <textarea
+          id="question"
+          name="question"
+          rows="5"
+          placeholder="Type your question here..."
+          required
+        ></textarea>
+
+        <button type="submit" class="btn">Submit</button>
+      </form>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

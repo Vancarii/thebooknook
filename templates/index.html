@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>
+      Welcome to
+      <div class="rounded-background"><span>The Book Nook</span></div>
+      📚
+    </h1>
+    <p>Find your next favourite book or donate your old books to help others</p>
+    <a href="{{ url_for('list_items') }}" class="btn">Search for a Book</a>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Book Nook</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <header>
+      <nav class="navbar">
+        <div class="container">
+          <a href="{{ url_for('index')}}" class="logo">The Book Nook</a>
+          <ul class="nav-links">
+            <li>
+              <a href="{{ url_for('add_customer') }}">Become Member</a>
+            </li>
+            <li><a href="{{ url_for('list_items') }}">Find Items</a></li>
+            <li>
+              <a href="{{ url_for('return_item') }}">Return Item</a>
+            </li>
+            <li><a href="{{ url_for('donate_item') }}">Donate an Item</a></li>
+            <li><a href="{{ url_for('list_events') }}">Find Events</a></li>
+            <li><a href="{{ url_for('volunteer') }}">Volunteer</a></li>
+            <li><a href="{{ url_for('ask_librarian') }}">Ask Librarian</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Flash Messages -->
+    <section class="messages">
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <ul>
+          {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %} {% endwith %}
+      </div>
+    </section>
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <p>&copy; 2025 The Book Nook. All rights reserved.</p>
+        <ul class="footer-links">
+          <li><a href="{{ url_for('list_items') }}">Find Items</a></li>
+          <li>
+            <a href="{{ url_for('return_item') }}">Return</a>
+          </li>
+          <li><a href="{{ url_for('donate_item') }}">Donate an Item</a></li>
+          <li><a href="{{ url_for('list_events') }}">Find Events</a></li>
+          <li><a href="{{ url_for('volunteer') }}">Volunteer</a></li>
+          <li><a href="{{ url_for('ask_librarian') }}">Ask Librarian</a></li>
+        </ul>
+      </div>
+    </footer>
+  </body>
+</html>

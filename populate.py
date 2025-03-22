@@ -8,19 +8,19 @@ def populate_tables():
 
     # Populate customers table
     c.executemany('''
-        INSERT INTO customers (name, email, phone, dob, address, outstanding_fine_balance)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO customers (name, email, phone, dob, address, preferences, outstanding_fine_balance)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', [
-        ('Alice Johnson', 'alice@example.com', '123-456-7890', '1990-05-15', '123 Main St', 0.0),
-        ('Bob Smith', 'bob@example.com', '987-654-3210', '1985-08-22', '456 Elm St', 5.0),
-        ('Charlie Brown', 'charlie@example.com', '555-123-4567', '2000-01-10', '789 Oak St', 0.0),
-        ('Diana Prince', 'diana@example.com', '444-555-6666', '1995-03-25', '321 Maple St', 2.5),
-        ('Eve Adams', 'eve@example.com', '333-444-5555', '1992-07-18', '654 Pine St', 0.0),
-        ('Frank Castle', 'frank@example.com', '222-333-4444', '1988-11-11', '987 Birch St', 0.0),
-        ('Grace Hopper', 'grace@example.com', '111-222-3333', '1991-09-09', '123 Cedar St', 0.0),
-        ('Hank Pym', 'hank@example.com', '999-888-7777', '1980-06-06', '456 Spruce St', 0.0),
-        ('Ivy League', 'ivy@example.com', '666-555-4444', '1993-03-03', '789 Willow St', 0.0),
-        ('Jack Ryan', 'jack@example.com', '333-222-1111', '1987-12-12', '321 Aspen St', 0.0)
+        ('Alice Johnson', 'alice@example.com', '123-456-7890', '1990-05-15', '123 Main St', 'Fiction', 0.0),
+        ('Bob Smith', 'bob@example.com', '987-654-3210', '1985-08-22', '456 Elm St', 'Science', 5.0),
+        ('Charlie Brown', 'charlie@example.com', '555-123-4567', '2000-01-10', '789 Oak St', 'History', 0.0),
+        ('Diana Prince', 'diana@example.com', '444-555-6666', '1995-03-25', '321 Maple St', 'Fantasy', 2.5),
+        ('Eve Adams', 'eve@example.com', '333-444-5555', '1992-07-18', '654 Pine St', 'Romance', 0.0),
+        ('Frank Castle', 'frank@example.com', '222-333-4444', '1988-11-11', '987 Birch St', 'Military', 0.0),
+        ('Grace Hopper', 'grace@example.com', '111-222-3333', '1991-09-09', '123 Cedar St', 'Education', 0.0),
+        ('Hank Pym', 'hank@example.com', '999-888-7777', '1980-06-06', '456 Spruce St', 'Science', 0.0),
+        ('Ivy League', 'ivy@example.com', '666-555-4444', '1993-03-03', '789 Willow St', 'Philosophy', 0.0),
+        ('Jack Ryan', 'jack@example.com', '333-222-1111', '1987-12-12', '321 Aspen St', 'Thriller', 0.0)
     ])
 
     # Populate library_items table

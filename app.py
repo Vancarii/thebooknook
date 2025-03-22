@@ -24,6 +24,7 @@ def init_db():
             phone TEXT,
             dob TEXT,
             address TEXT,
+            preferences TEXT,
             outstanding_fine_balance REAL DEFAULT 0.0
         )
     ''')
@@ -59,7 +60,20 @@ def init_db():
         )
     ''')
 
-    # 4) events table
+    # 4) fines table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS fines (
+            fine_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_id INTEGER NOT NULL,
+            customer_id INTEGER NOT NULL,
+            amount_of_fine REAL,
+            fine_status TEXT DEFAULT 'Unpaid',
+            FOREIGN KEY (transaction_id) REFERENCES borrowing(transaction_id),
+            FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+        )
+    ''')
+
+    # 5) events table
     c.execute('''
         CREATE TABLE IF NOT EXISTS events (
             event_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,7 +88,7 @@ def init_db():
         )
     ''')
 
-    # 5) registered_events table (join table between customers & events)
+    # 6) registered_events table (join table between customers & events)
     c.execute('''
         CREATE TABLE IF NOT EXISTS registered_events (
             registration_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,7 +99,7 @@ def init_db():
         )
     ''')
 
-    # 6) personnel table
+    # 7) personnel table
     c.execute('''
         CREATE TABLE IF NOT EXISTS personnel (
             employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,7 +113,7 @@ def init_db():
         )
     ''')
 
-    # 7) event_personnel table (join table between personnel & events)
+    # 8) event_personnel table (join table between personnel & events)
     c.execute('''
         CREATE TABLE IF NOT EXISTS event_personnel (
             ep_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -110,18 +124,6 @@ def init_db():
         )
     ''')
 
-    # 8) fines table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS fines (
-            fine_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            transaction_id INTEGER NOT NULL,
-            customer_id INTEGER NOT NULL,
-            amount_of_fine REAL,
-            fine_status TEXT DEFAULT 'Unpaid',
-            FOREIGN KEY (transaction_id) REFERENCES borrowing(transaction_id),
-            FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-        )
-    ''')
 
     conn.commit()
     conn.close()
@@ -404,15 +406,16 @@ def add_customer():
         phone = request.form.get('phone')
         dob = request.form.get('dob')
         address = request.form.get('address')
+        preferences = request.form.get('preferences')
         outstanding_fine_balance = request.form.get('outstanding_fine_balance', 0.0)
 
         # Insert the new customer into the database
         conn = get_db_connection()
         c = conn.cursor()
         c.execute('''
-            INSERT INTO customers (name, email, phone, dob, address, outstanding_fine_balance)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (name, email, phone, dob, address, outstanding_fine_balance))
+            INSERT INTO customers (name, email, phone, dob, address, preferences, outstanding_fine_balance)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (name, email, phone, dob, address, preferences, outstanding_fine_balance))
         conn.commit()
 
         # Fetch the newly created customer's information

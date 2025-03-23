@@ -74,9 +74,9 @@ def populate_tables():
         ('Science Fair', 'Explore science projects.', 'Exhibition', 'Kids', 0, 'Room J', '2025-05-10 12:00', 50)
     ])
 
-    # Populate registered_events table
+    # Populate register table
     c.executemany('''
-        INSERT INTO registered_events (event_id, customer_id)
+        INSERT INTO register (event_id, customer_id)
         VALUES (?, ?)
     ''', [
         (1, 1), (2, 2), (3, 3), (4, 4), (5, 5),
@@ -100,9 +100,9 @@ def populate_tables():
         ('Natalie Portman', '1992-03-22', '456 Library St', 'natalie.portman@example.com', '333-222-1111', 0, 'Volunteer')
     ])
 
-    # Populate event_personnel table
+    # Populate manage table
     c.executemany('''
-        INSERT INTO event_personnel (event_id, employee_id)
+        INSERT INTO manage (event_id, employee_id)
         VALUES (?, ?)
     ''', [
         (1, 1), (2, 2), (3, 3), (4, 4), (5, 5),

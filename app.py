@@ -88,10 +88,10 @@ def init_db():
         )
     ''')
 
-    # 6) registered_events table (join table between customers & events)
+    # 6) register table (join table between customers & events)
     c.execute('''
-        CREATE TABLE IF NOT EXISTS registered_events (
-            registration_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE IF NOT EXISTS register (
+            register_id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER NOT NULL,
             customer_id INTEGER NOT NULL,
             FOREIGN KEY (event_id) REFERENCES events(event_id),
@@ -113,10 +113,10 @@ def init_db():
         )
     ''')
 
-    # 8) event_personnel table (join table between personnel & events)
+    # 8) manage table (join table between personnel & events)
     c.execute('''
-        CREATE TABLE IF NOT EXISTS event_personnel (
-            ep_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE IF NOT EXISTS manage (
+            manage_id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER NOT NULL,
             employee_id INTEGER NOT NULL,
             FOREIGN KEY (event_id) REFERENCES events(event_id),
@@ -339,7 +339,7 @@ def register_event(event_id):
     if request.method == 'POST':
         customer_id = request.form.get('customer_id')
         c.execute('''
-            INSERT INTO registered_events (event_id, customer_id)
+            INSERT INTO register (event_id, customer_id)
             VALUES (?, ?)
         ''', (event_id, customer_id))
         conn.commit()

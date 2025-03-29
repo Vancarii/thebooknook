@@ -23,18 +23,19 @@
     <p>Item ID: {{ transaction.item_id }}</p>
     <p>Borrowed Date: {{ transaction.borrowed_date }}</p>
     <p>Due Date: {{ transaction.due_date }}</p>
-    <p>Returned Date (if any): {{ transaction.returned_date }}</p>
     <form method="post" class="form-container">
+      <input
+        type="hidden"
+        name="transaction_id"
+        value="{{ transaction.transaction_id }}"
+      />
       <label>Returned Date:</label>
       <input type="date" name="returned_date" required /><br /><br />
 
-      <label>Fine (if applicable):</label>
-      <input
-        type="number"
-        step="0.01"
-        name="amount_of_fine"
-        placeholder="0.00"
-      /><br /><br />
+      <p>
+        <strong>Note:</strong> Late returns (after 15 days of borrowing) will
+        automatically incur a fine.
+      </p>
 
       <button type="submit" class="btn">Confirm Return</button>
     </form>

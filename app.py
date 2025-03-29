@@ -20,12 +20,12 @@ def init_db():
         CREATE TABLE IF NOT EXISTS customers (
             customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            email TEXT,
+            email TEXT UNIQUE,
             phone TEXT,
-            dob TEXT,
+            dob TEXT NOT NULL,
             address TEXT,
             preferences TEXT,
-            outstanding_fine_balance REAL DEFAULT 0.0
+            outstanding_fine_balance REAL DEFAULT 0.0 CHECK (outstanding_fine_balance >= 0)
         )
     ''')
 
@@ -33,15 +33,15 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS library_items (
             item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
+            title TEXT NOT NULL,
             author TEXT,
-            item_type TEXT,
-            format TEXT,
+            item_type TEXT CHECK (item_type IN ('Book', 'CD', 'DVD', 'Magazine', 'Journal', 'Record')),
+            format TEXT CHECK (format IN ('Print', 'Online', 'Audio', 'Video')),
             genre TEXT,
             published_date TEXT,
-            availability TEXT DEFAULT 'Available',
-            is_future_item BOOLEAN DEFAULT 0,
-            restriction INTEGER DEFAULT 0
+            availability TEXT DEFAULT 'Available' CHECK (availability IN ('Available', 'Borrowed')),
+            is_future_item BOOLEAN DEFAULT 0 CHECK (is_future_item IN (0, 1)),
+            restriction INTEGER DEFAULT 0 CHECK (restriction >= 0)
         )
     ''')
 
@@ -51,12 +51,12 @@ def init_db():
             transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
             item_id INTEGER NOT NULL,
             customer_id INTEGER NOT NULL,
-            borrowed_date TEXT,
+            borrowed_date TEXT NOT NULL,
             due_date TEXT,
             returned_date TEXT,
-            amount_of_fine REAL DEFAULT 0.0,
-            FOREIGN KEY (item_id) REFERENCES library_items(item_id),
-            FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+            amount_of_fine REAL DEFAULT 0.0 CHECK (amount_of_fine >= 0),
+            FOREIGN KEY (item_id) REFERENCES library_items(item_id) ON DELETE CASCADE,
+            FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
         )
     ''')
 
@@ -66,10 +66,10 @@ def init_db():
             fine_id INTEGER PRIMARY KEY AUTOINCREMENT,
             transaction_id INTEGER NOT NULL,
             customer_id INTEGER NOT NULL,
-            amount_of_fine REAL,
-            fine_status TEXT DEFAULT 'Unpaid',
-            FOREIGN KEY (transaction_id) REFERENCES borrowing(transaction_id),
-            FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+            amount_of_fine REAL NOT NULL CHECK (amount_of_fine >= 0),
+            fine_status TEXT DEFAULT 'Unpaid' CHECK (fine_status IN ('Paid', 'Unpaid')),
+            FOREIGN KEY (transaction_id) REFERENCES borrowing(transaction_id) ON DELETE CASCADE,
+            FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
         )
     ''')
 
@@ -77,14 +77,14 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS events (
             event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_name TEXT,
+            event_name TEXT NOT NULL,
             event_description TEXT,
-            event_type TEXT,
+            event_type TEXT CHECK (event_type IN ('Workshop', 'Seminar', 'Film Screening', 'Book Club', 'Art Show')),
             targeted_customers TEXT,
-            restriction INTEGER DEFAULT 0,
+            restriction INTEGER DEFAULT 0 CHECK (restriction >= 0),
             location TEXT,
-            datetime TEXT,
-            capacity INTEGER
+            datetime TEXT NOT NULL,
+            capacity INTEGER CHECK (capacity >= 0)
         )
     ''')
 
@@ -94,8 +94,8 @@ def init_db():
             register_id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER NOT NULL,
             customer_id INTEGER NOT NULL,
-            FOREIGN KEY (event_id) REFERENCES events(event_id),
-            FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+            FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE,
+            FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
         )
     ''')
 
@@ -104,12 +104,12 @@ def init_db():
         CREATE TABLE IF NOT EXISTS personnel (
             employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            dob TEXT,
+            dob TEXT NOT NULL,
             address TEXT,
-            email TEXT,
+            email TEXT UNIQUE,
             phone TEXT,
-            salary REAL,
-            job_role TEXT
+            salary REAL DEFAULT 0.0 CHECK (salary >= 0),
+            job_role TEXT NOT NULL
         )
     ''')
 
@@ -119,17 +119,63 @@ def init_db():
             manage_id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER NOT NULL,
             employee_id INTEGER NOT NULL,
-            FOREIGN KEY (event_id) REFERENCES events(event_id),
-            FOREIGN KEY (employee_id) REFERENCES personnel(employee_id)
+            FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE,
+            FOREIGN KEY (employee_id) REFERENCES personnel(employee_id) ON DELETE CASCADE
         )
     ''')
 
+    # TRIGGERS --------------------------------------------
+
+    # Trigger to update item availability in library_items table when insert on borrowing table
+    c.execute('''
+        CREATE TRIGGER IF NOT EXISTS update_item_borrowed
+        AFTER INSERT ON borrowing
+        BEGIN
+            UPDATE library_items
+            SET availability = 'Borrowed'
+            WHERE item_id = NEW.item_id;
+        END;        
+    ''')
+    
+    # Trigger to update item availability to Available when item returned
+    c.execute('''
+        CREATE TRIGGER IF NOT EXISTS update_item_returned
+        AFTER UPDATE ON borrowing 
+        WHEN NEW.returned_date IS NOT NULL AND OLD.returned_date IS NULL
+        BEGIN
+            UPDATE library_items
+            SET availability = 'Available'
+            WHERE item_id = NEW.item_id;
+        END;
+    ''')
+
+    # Trigger to update customer fine balance when a fine is added
+    c.execute('''
+        CREATE TRIGGER IF NOT EXISTS update_customer_fine_balance
+        AFTER INSERT ON fines
+        BEGIN
+            UPDATE customers
+            SET outstanding_fine_balance = outstanding_fine_balance + NEW.amount_of_fine
+            WHERE customer_id = NEW.customer_id;
+        END;
+    ''')
+
+    # Trigger to update customer fine balance when a fine is paid
+    c.execute('''
+        CREATE TRIGGER IF NOT EXISTS update_customer_fine_balance_paid
+        AFTER UPDATE ON fines
+        WHEN NEW.fine_status = 'Paid' AND OLD.fine_status = 'Unpaid'
+        BEGIN
+            UPDATE customers
+            SET outstanding_fine_balance = outstanding_fine_balance - NEW.amount_of_fine
+            WHERE customer_id = NEW.customer_id;
+        END;
+    ''')
 
     conn.commit()
     conn.close()
 
 def get_db_connection():
-    """Helper function to connect to the SQLite DB with row dictionary factory."""
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
@@ -184,7 +230,6 @@ def borrow_item(item_id):
     if request.method == 'POST':
         customer_id = request.form.get('customer_id')
         borrowed_date = request.form.get('borrowed_date')
-        # due_date = request.form.get('due_date')
 
         # Calculate due date (2 weeks after borrowed date)
         borrowed_date_obj = datetime.strptime(borrowed_date, '%Y-%m-%d')
@@ -196,14 +241,28 @@ def borrow_item(item_id):
             INSERT INTO borrowing (item_id, customer_id, borrowed_date, due_date)
             VALUES (?, ?, ?, ?)
         ''', (item_id, customer_id, borrowed_date, due_date))
-
-        # Update item availability
-        c.execute("UPDATE library_items SET availability = 'Borrowed' WHERE item_id = ?", (item_id,))
+        
+        # Get the transaction ID of the newly inserted record
+        transaction_id = c.lastrowid
+        
+        # Get item details for the confirmation page
+        c.execute("SELECT * FROM library_items WHERE item_id = ?", (item_id,))
+        item = c.fetchone()
+        
+        # Get customer details
+        c.execute("SELECT * FROM customers WHERE customer_id = ?", (customer_id,))
+        customer = c.fetchone()
 
         conn.commit()
         conn.close()
-        flash("Item borrowed successfully!", "success")
-        return redirect(url_for('list_items'))
+        
+        # Render a borrow confirmation page with transaction details
+        return render_template('borrow_confirmation.html', 
+                              transaction_id=transaction_id,
+                              item=item,
+                              customer=customer,
+                              borrowed_date=borrowed_date,
+                              due_date=due_date)
 
 # -----------------------------------------------------
 # (3) RETURN AN ITEM /return/<transaction_id>
@@ -219,42 +278,85 @@ def return_item():
         return render_template('return_item.html', transaction=None, item=None)
 
     if request.method == 'POST':
+        # Check which form was submitted
         transaction_id = request.form.get('transaction_id')
         returned_date = request.form.get('returned_date')
-        amount_of_fine = request.form.get('amount_of_fine', 0)
-
-        if not transaction_id:
+        
+        # Case 1: Just searching for a transaction
+        if transaction_id and not returned_date:
+            c.execute("SELECT * FROM borrowing WHERE transaction_id = ?", (transaction_id,))
+            transaction = c.fetchone()
+            
+            if not transaction:
+                flash("Transaction not found.", "danger")
+                conn.close()
+                return redirect(url_for('return_item'))
+            
+            # If it's already returned, show a message
+            if transaction['returned_date']:
+                flash(f"This item was already returned on {transaction['returned_date']}", "info")
+                conn.close()
+                return redirect(url_for('return_item'))
+            
+            # Get item details to display
+            c.execute("SELECT * FROM library_items WHERE item_id = ?", (transaction['item_id'],))
+            item = c.fetchone()
+            
+            conn.close()
+            return render_template('return_item.html', transaction=transaction, item=item)
+        
+        # Case 2: Confirming the return
+        elif transaction_id and returned_date:
+            # Fetch the transaction details
+            c.execute("SELECT * FROM borrowing WHERE transaction_id = ?", (transaction_id,))
+            transaction = c.fetchone()
+            
+            if not transaction:
+                flash("Transaction not found.", "danger")
+                conn.close()
+                return redirect(url_for('return_item'))
+            
+            # Calculate fine based on return date
+            # If return date is more than 3 weeks after borrowed date, add fine
+            borrowed_date_obj = datetime.strptime(transaction['borrowed_date'], '%Y-%m-%d')
+            returned_date_obj = datetime.strptime(returned_date, '%Y-%m-%d')
+            
+            # Calculate days difference
+            days_difference = (returned_date_obj - borrowed_date_obj).days
+            
+            # Set fine if more than 2 weeks (15 days)
+            amount_of_fine = 0.0
+            if days_difference > 15:
+                # $1 per day after the 15-day period
+                amount_of_fine = (days_difference - 15) * 1.0
+            
+            # Record fine if applicable
+            if amount_of_fine > 0:
+                c.execute('''
+                    INSERT INTO fines (transaction_id, customer_id, amount_of_fine)
+                    VALUES (?, ?, ?)
+                ''', (transaction_id, transaction['customer_id'], amount_of_fine))
+                
+                flash(f"A fine of ${amount_of_fine:.2f} has been applied for late return.", "info")
+            
+            # Update the borrowing record with the returned date
+            c.execute('''
+                UPDATE borrowing
+                SET returned_date = ?, amount_of_fine = ?
+                WHERE transaction_id = ?
+            ''', (returned_date, amount_of_fine, transaction_id))
+            
+            conn.commit()
+            conn.close()
+            
+            flash("Item returned successfully!", "success")
+            return redirect(url_for('list_items'))
+        
+        else:
             flash("Please enter a valid Transaction ID.", "danger")
             conn.close()
             return redirect(url_for('return_item'))
-
-        # Fetch the transaction details
-        c.execute("SELECT * FROM borrowing WHERE transaction_id = ?", (transaction_id,))
-        transaction = c.fetchone()
-        if not transaction:
-            flash("Transaction not found.", "danger")
-            conn.close()
-            return redirect(url_for('return_item'))
-
-        # Update the borrowing record with the returned date and fine
-        c.execute('''
-            UPDATE borrowing
-            SET returned_date = ?, amount_of_fine = ?
-            WHERE transaction_id = ?
-        ''', (returned_date, amount_of_fine, transaction_id))
-
-        # Update the item's availability to 'Available'
-        c.execute('''
-            UPDATE library_items
-            SET availability = 'Available'
-            WHERE item_id = ?
-        ''', (transaction['item_id'],))
-
-        conn.commit()
-        conn.close()
-
-        flash("Item returned successfully!", "success")
-        return redirect(url_for('list_items'))
+        
 # -----------------------------------------------------
 # (4) DONATE AN ITEM /donate
 # -----------------------------------------------------
@@ -295,9 +397,18 @@ def donate_item():
 def list_events():
     conn = get_db_connection()
     c = conn.cursor()
+    search_query = request.args.get('q', '')
 
-    # Fetch all events
-    c.execute("SELECT * FROM events")
+    if search_query:
+        c.execute(
+            """
+            SELECT * FROM events
+            WHERE event_name LIKE ? OR event_description LIKE ?
+            """,
+            (f'%{search_query}%', f'%{search_query}%')
+        )
+    else:
+        c.execute("SELECT * FROM events")
     events = c.fetchall()
 
     # Handle registration form submission
@@ -307,7 +418,7 @@ def list_events():
 
         # Insert registration into the database
         c.execute('''
-            INSERT INTO registered_events (event_id, customer_id)
+            INSERT INTO register (event_id, customer_id)
             VALUES (?, ?)
         ''', (event_id, customer_id))
         conn.commit()
@@ -316,7 +427,7 @@ def list_events():
         return redirect(url_for('list_events'))
 
     conn.close()
-    return render_template('register_event.html', events=events)
+    return render_template('events.html', events=events)
 
 # -----------------------------------------------------
 # (6) REGISTER FOR AN EVENT /register_event/<event_id>
@@ -361,8 +472,9 @@ def volunteer():
         address = request.form.get('address')
         email = request.form.get('email')
         phone = request.form.get('phone')
-        salary = request.form.get('salary', 0)
-        job_role = request.form.get('job_role', 'Volunteer')
+
+        salary = 0.0  # Default salary for volunteers
+        job_role = "Volunteer"  # Default job role for volunteers
 
         conn = get_db_connection()
         c = conn.cursor()
@@ -370,10 +482,19 @@ def volunteer():
             INSERT INTO personnel (name, dob, address, email, phone, salary, job_role)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', (name, dob, address, email, phone, salary, job_role))
+        
+        # Get the employee ID of the newly inserted record
+        employee_id = c.lastrowid
+        
+        # Get personnel details for the confirmation page
+        c.execute("SELECT * FROM personnel WHERE employee_id = ?", (employee_id,))
+        personnel = c.fetchone()
+        
         conn.commit()
         conn.close()
-        flash("Thank you for volunteering!", "success")
-        return redirect(url_for('index'))
+        
+        # Render a confirmation page with application details
+        return render_template('volunteer_confirmation.html', personnel=personnel)
 
 # -----------------------------------------------------
 # (8) ASK FOR HELP FROM A LIBRARIAN /ask_librarian

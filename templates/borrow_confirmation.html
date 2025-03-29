@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Item Borrowed Successfully!</h1>
+    <p>
+      Your transaction has been completed. Please keep this information for your
+      records.
+    </p>
+  </div>
+
+  <!-- Transaction Details -->
+  <section class="messages">
+    <div class="container">
+      <div class="customer-details">
+        <h2>Transaction Details</h2>
+        <p><strong>Transaction ID:</strong> {{ transaction_id }}</p>
+        <p><strong>Customer ID:</strong> {{ customer.customer_id }}</p>
+        <p><strong>Customer Name:</strong> {{ customer.name }}</p>
+        <p><strong>Item ID:</strong> {{ item.item_id }}</p>
+        <p><strong>Title:</strong> {{ item.title }}</p>
+        <p><strong>Author:</strong> {{ item.author }}</p>
+        <p><strong>Borrowed Date:</strong> {{ borrowed_date }}</p>
+        <p><strong>Due Date:</strong> {{ due_date }}</p>
+      </div>
+      <p>
+        <strong>Note:</strong> Remember your Transaction ID for when you return
+        this item.
+      </p>
+      <p>
+        <a href="{{ url_for('list_items') }}" class="btn">Browse More Items</a>
+      </p>
+      <p><a href="{{ url_for('index') }}" class="btn">Go to Home</a></p>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

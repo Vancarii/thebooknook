@@ -23,23 +23,6 @@ def populate_tables():
         ('Jack Ryan', 'jack@example.com', '333-222-1111', '1987-12-12', '321 Aspen St', 'Thriller', 0.0)
     ])
 
-    # Populate library_items table
-    c.executemany('''
-        INSERT INTO library_items (title, author, item_type, format, genre, published_date, availability, is_future_item, restriction)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', [
-        ('The Great Gatsby', 'F. Scott Fitzgerald', 'Book', 'Print', 'Fiction', '1925-04-10', 'Available', 0, 0),
-        ('1984', 'George Orwell', 'Book', 'Print', 'Dystopian', '1949-06-08', 'Borrowed', 0, 0),
-        ('To Kill a Mockingbird', 'Harper Lee', 'Book', 'Print', 'Fiction', '1960-07-11', 'Available', 0, 0),
-        ('The Catcher in the Rye', 'J.D. Salinger', 'Book', 'Print', 'Fiction', '1951-07-16', 'Available', 0, 0),
-        ('The Beatles: Abbey Road', 'The Beatles', 'CD', 'Audio', 'Music', '1969-09-26', 'Available', 0, 0),
-        ('The Matrix', 'Wachowski Brothers', 'DVD', 'Video', 'Sci-Fi', '1999-03-31', 'Available', 0, 13),
-        ('National Geographic', 'Various', 'Magazine', 'Print', 'Science', '2025-01-01', 'Available', 0, 0),
-        ('Python Programming', 'Guido van Rossum', 'Book', 'Print', 'Education', '2010-05-01', 'Available', 0, 0),
-        ('The Art of War', 'Sun Tzu', 'Book', 'Print', 'Philosophy', '500 BC', 'Available', 0, 0),
-        ('The Hobbit', 'J.R.R. Tolkien', 'Book', 'Print', 'Fantasy', '1937-09-21', 'Available', 0, 0)
-    ])
-
     # Populate borrowing table
     c.executemany('''
         INSERT INTO borrowing (item_id, customer_id, borrowed_date, due_date, returned_date, amount_of_fine)
@@ -57,21 +40,39 @@ def populate_tables():
         (10, 10, '2025-03-30', '2025-04-13', None, 0.0)
     ])
 
+        # Populate library_items table
+    c.executemany('''
+        INSERT INTO library_items (title, author, item_type, format, genre, published_date, availability, is_future_item, restriction)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', [
+        ('The Great Gatsby', 'F. Scott Fitzgerald', 'Book', 'Print', 'Fiction', '1925-04-10', 'Available', 0, 0),
+        ('1984', 'George Orwell', 'Book', 'Print', 'Dystopian', '1949-06-08', 'Borrowed', 0, 0),
+        ('To Kill a Mockingbird', 'Harper Lee', 'Book', 'Print', 'Fiction', '1960-07-11', 'Available', 0, 0),
+        ('The Catcher in the Rye', 'J.D. Salinger', 'Book', 'Print', 'Fiction', '1951-07-16', 'Available', 0, 0),
+        ('The Beatles: Abbey Road', 'The Beatles', 'CD', 'Audio', 'Music', '1969-09-26', 'Available', 0, 0),
+        ('The Matrix', 'Wachowski Brothers', 'DVD', 'Video', 'Sci-Fi', '1999-03-31', 'Available', 0, 13),
+        ('National Geographic', 'Various', 'Magazine', 'Print', 'Science', '2025-01-01', 'Available', 1, 0),
+        ('Python Programming', 'Guido van Rossum', 'Book', 'Print', 'Education', '2010-05-01', 'Available', 0, 0),
+        ('The Art of War', 'Sun Tzu', 'Book', 'Print', 'Philosophy', '500 BC', 'Available', 0, 0),
+        ('The Hobbit', 'J.R.R. Tolkien', 'Book', 'Print', 'Fantasy', '1937-09-21', 'Available', 1, 0)
+    ])
+
+
     # Populate events table
     c.executemany('''
         INSERT INTO events (event_name, event_description, event_type, targeted_customers, restriction, location, datetime, capacity)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', [
-        ('Book Club', 'Discussing the latest bestsellers.', 'Discussion', 'Adults', 0, 'Room A', '2025-03-25 18:00', 20),
-        ('Art Show', 'Exhibition of local artists.', 'Exhibition', 'All Ages', 0, 'Room B', '2025-03-30 14:00', 50),
-        ('Film Screening', 'Classic movie night.', 'Screening', 'Teens', 13, 'Room C', '2025-04-05 19:00', 30),
+        ('Book Club', 'Discussing the latest bestsellers.', 'Book Club', 'Adults', 0, 'Room A', '2025-03-25 18:00', 20),
+        ('Art Show', 'Exhibition of local artists.', 'Art Show', 'All Ages', 0, 'Room B', '2025-03-30 14:00', 50),
+        ('Film Screening', 'Classic movie night.', 'Film Screening', 'Teens', 13, 'Room C', '2025-04-05 19:00', 30),
         ('Coding Workshop', 'Learn Python programming.', 'Workshop', 'Adults', 0, 'Room D', '2025-04-10 10:00', 15),
-        ('Story Time', 'Stories for kids.', 'Reading', 'Kids', 0, 'Room E', '2025-04-15 11:00', 25),
-        ('Poetry Night', 'Share and listen to poetry.', 'Reading', 'Adults', 0, 'Room F', '2025-04-20 19:00', 30),
-        ('Chess Tournament', 'Compete in a chess tournament.', 'Competition', 'All Ages', 0, 'Room G', '2025-04-25 14:00', 20),
+        ('Story Time', 'Reading stories for kids.', 'Book Club', 'Kids', 0, 'Room E', '2025-04-15 11:00', 25),
+        ('Poetry Night', 'Share and listen to poetry.', 'Seminar', 'Adults', 0, 'Room F', '2025-04-20 19:00', 30),
+        ('Chess Tournament', 'Compete in a chess tournament.', 'Workshop', 'All Ages', 0, 'Room G', '2025-04-25 14:00', 20),
         ('Photography Workshop', 'Learn photography basics.', 'Workshop', 'Teens', 13, 'Room H', '2025-04-30 10:00', 15),
-        ('Music Night', 'Live music performances.', 'Performance', 'All Ages', 0, 'Room I', '2025-05-05 18:00', 40),
-        ('Science Fair', 'Explore science projects.', 'Exhibition', 'Kids', 0, 'Room J', '2025-05-10 12:00', 50)
+        ('Music Night', 'Live music performances.', 'Art Show', 'All Ages', 0, 'Room I', '2025-05-05 18:00', 40),
+        ('Science Fair', 'Explore science projects.', 'Seminar', 'Kids', 0, 'Room J', '2025-05-10 12:00', 50)
     ])
 
     # Populate register table

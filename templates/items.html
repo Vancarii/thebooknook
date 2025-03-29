@@ -36,6 +36,8 @@
             <th>Item ID</th>
             <th>Title</th>
             <th>Author</th>
+            <th>Genre</th>
+            <th>Status</th>
             <th>Availability</th>
             <th>Action</th>
           </tr>
@@ -46,14 +48,25 @@
             <td>{{ item.item_id }}</td>
             <td>{{ item.title }}</td>
             <td>{{ item.author }}</td>
+            <td>{{ item.genre }}</td>
             <td>{{ item.availability }}</td>
             <td>
-              {% if item.availability == 'Available' %}
+              {% if item.is_future_item == 1 %}
+              <span class="future-item">Coming Soon</span>
+              {% else %}
+              <span class="current-item">In Collection</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if item.availability == 'Available' and item.is_future_item !=
+              1 %}
               <a
                 href="{{ url_for('borrow_item', item_id=item.item_id) }}"
                 class="btn"
                 >Borrow</a
               >
+              {% elif item.is_future_item == 1 %}
+              <span class="not-available">Coming Soon</span>
               {% else %}
               <span class="not-available">Not Available</span>
               {% endif %}

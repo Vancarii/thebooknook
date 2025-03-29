@@ -307,7 +307,7 @@ def list_events():
 
         # Insert registration into the database
         c.execute('''
-            INSERT INTO registered_events (event_id, customer_id)
+            INSERT INTO register (event_id, customer_id)
             VALUES (?, ?)
         ''', (event_id, customer_id))
         conn.commit()
